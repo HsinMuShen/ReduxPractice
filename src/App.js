@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { createGlobalStyle } from 'styled-components';
-import { Reset } from 'styled-reset';
+import { useState, useReducer } from "react";
+import { Outlet } from "react-router-dom";
+import { createGlobalStyle } from "styled-components";
+import { Reset } from "styled-reset";
 
-import Footer from './components/Footer/Footer';
-import Header from './components/Header/Header';
-import CartContext from './contexts/CartContext';
-import PingFangTCRegular from './fonts/PingFang-TC-Regular-2.otf';
-import PingFangTCThin from './fonts/PingFang-TC-Thin-2.otf';
-import NotoSansTCRegular from './fonts/NotoSansTC-Regular.otf';
-import NotoSansTCBold from './fonts/NotoSansTC-Bold.otf';
+import Footer from "./components/Footer/Footer";
+import Header from "./components/Header/Header";
+import CartContext from "./contexts/CartContext";
+import PingFangTCRegular from "./fonts/PingFang-TC-Regular-2.otf";
+import PingFangTCThin from "./fonts/PingFang-TC-Thin-2.otf";
+import NotoSansTCRegular from "./fonts/NotoSansTC-Regular.otf";
+import NotoSansTCBold from "./fonts/NotoSansTC-Bold.otf";
 
 const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -55,9 +55,49 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
+const Action = {
+  GET_ITEM: "GET_ITEM",
+  ADD_ITEM: "ADD_ITEM",
+  CHANGE_ITEM_QUANTITY: "CHANGE_ITEM_QUANTITY",
+  DELETE_ITEM: "DELETE_ITEM",
+  CLEAR_ITEM: "CLEAR_ITEM",
+};
+
+function reducer(cartItems, action) {
+  switch (action.type) {
+    case Action.ADD_ITEM: {
+      const newCartItems = [...cartItems, action.payload.item];
+      return newCartItems;
+    }
+    case Action.CHANGE_ITEM_QUANTITY: {
+      const newCartItems = cartItems.map((item, index) =>
+        index === action.payload.itemIndex
+          ? {
+              ...item,
+              qty: action.payload.itemQuantity,
+            }
+          : item
+      );
+      return newCartItems;
+    }
+    case Action.DELETE_ITEM: {
+      const newCartItems = cartItems.filter(
+        (_, index) => index !== action.payload.itemIndex
+      );
+      return newCartItems;
+    }
+    case Action.CLEAR_ITEM: {
+      const newCartItems = [];
+      return newCartItems;
+    }
+  }
+  return;
+}
+
 function App() {
-  const [cartItems, setCartItems] = useState(
-    JSON.parse(window.localStorage.getItem('cartItems')) || []
+  const [cartItems, dispatch] = useReducer(
+    reducer,
+    JSON.parse(window.localStorage.getItem("cartItems")) || []
   );
 
   function getItems() {
@@ -65,37 +105,34 @@ function App() {
   }
 
   function addItem(item) {
-    const newCartItems = [...cartItems, item];
-    setCartItems(newCartItems);
-    window.localStorage.setItem('cartItems', JSON.stringify(newCartItems));
-    window.alert('已加入商品');
+    dispatch({ type: Action.ADD_ITEM, payload: { item: item } });
+    window.localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    window.alert("已加入商品");
   }
 
   function changeItemQuantity(itemIndex, itemQuantity) {
-    const newCartItems = cartItems.map((item, index) =>
-      index === itemIndex
-        ? {
-            ...item,
-            qty: itemQuantity,
-          }
-        : item
-    );
-    setCartItems(newCartItems);
-    window.localStorage.setItem('cartItems', JSON.stringify(newCartItems));
-    window.alert('已修改數量');
+    dispatch({
+      type: Action.CHANGE_ITEM_QUANTITY,
+      payload: { itemIndex: itemIndex, itemQuantity: itemQuantity },
+    });
+    window.localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    window.alert("已修改數量");
   }
 
   function deleteItem(itemIndex) {
-    const newCartItems = cartItems.filter((_, index) => index !== itemIndex);
-    setCartItems(newCartItems);
-    window.localStorage.setItem('cartItems', JSON.stringify(newCartItems));
-    window.alert('已刪除商品');
+    dispatch({
+      type: Action.DELETE_ITEM,
+      payload: { itemIndex: itemIndex },
+    });
+    window.localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    window.alert("已刪除商品");
   }
 
   function clearItems() {
-    const newCartItems = [];
-    setCartItems(newCartItems);
-    window.localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+    dispatch({
+      type: Action.CLEAR_ITEM,
+    });
+    window.localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }
 
   const cart = {
