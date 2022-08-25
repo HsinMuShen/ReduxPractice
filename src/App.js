@@ -90,14 +90,21 @@ function reducer(cartItems, action) {
       const newCartItems = [];
       return newCartItems;
     }
+    default:
+      return cartItems;
   }
-  return;
+}
+
+function init() {
+  const initialState = JSON.parse(window.localStorage.getItem("cartItems"));
+  return initialState;
 }
 
 function App() {
   const [cartItems, dispatch] = useReducer(
     reducer,
-    JSON.parse(window.localStorage.getItem("cartItems")) || []
+    JSON.parse(window.localStorage.getItem("cartItems")) || [],
+    init
   );
 
   function getItems() {
