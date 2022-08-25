@@ -1,4 +1,4 @@
-import { useState, useReducer } from "react";
+import { useState, useReducer, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import { Reset } from "styled-reset";
@@ -105,17 +105,15 @@ function App() {
   }
 
   function addItem(item) {
-    dispatch({ type: Action.ADD_ITEM, payload: { item: item } });
-    window.localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    dispatch({ type: Action.ADD_ITEM, payload: { item } });
     window.alert("已加入商品");
   }
 
   function changeItemQuantity(itemIndex, itemQuantity) {
     dispatch({
       type: Action.CHANGE_ITEM_QUANTITY,
-      payload: { itemIndex: itemIndex, itemQuantity: itemQuantity },
+      payload: { itemIndex, itemQuantity },
     });
-    window.localStorage.setItem("cartItems", JSON.stringify(cartItems));
     window.alert("已修改數量");
   }
 
@@ -124,7 +122,6 @@ function App() {
       type: Action.DELETE_ITEM,
       payload: { itemIndex: itemIndex },
     });
-    window.localStorage.setItem("cartItems", JSON.stringify(cartItems));
     window.alert("已刪除商品");
   }
 
@@ -132,7 +129,6 @@ function App() {
     dispatch({
       type: Action.CLEAR_ITEM,
     });
-    window.localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }
 
   const cart = {
@@ -142,6 +138,10 @@ function App() {
     deleteItem,
     clearItems,
   };
+
+  useEffect(() => {
+    window.localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
 
   return (
     <CartContext.Provider value={cart}>
