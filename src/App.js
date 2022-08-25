@@ -55,7 +55,7 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-const Action = {
+const ActionType = {
   GET_ITEM: "GET_ITEM",
   ADD_ITEM: "ADD_ITEM",
   CHANGE_ITEM_QUANTITY: "CHANGE_ITEM_QUANTITY",
@@ -65,11 +65,11 @@ const Action = {
 
 function reducer(cartItems, action) {
   switch (action.type) {
-    case Action.ADD_ITEM: {
+    case ActionType.ADD_ITEM: {
       const newCartItems = [...cartItems, action.payload.item];
       return newCartItems;
     }
-    case Action.CHANGE_ITEM_QUANTITY: {
+    case ActionType.CHANGE_ITEM_QUANTITY: {
       const newCartItems = cartItems.map((item, index) =>
         index === action.payload.itemIndex
           ? {
@@ -80,13 +80,13 @@ function reducer(cartItems, action) {
       );
       return newCartItems;
     }
-    case Action.DELETE_ITEM: {
+    case ActionType.DELETE_ITEM: {
       const newCartItems = cartItems.filter(
         (_, index) => index !== action.payload.itemIndex
       );
       return newCartItems;
     }
-    case Action.CLEAR_ITEM: {
+    case ActionType.CLEAR_ITEM: {
       const newCartItems = [];
       return newCartItems;
     }
@@ -112,13 +112,13 @@ function App() {
   }
 
   function addItem(item) {
-    dispatch({ type: Action.ADD_ITEM, payload: { item } });
+    dispatch({ type: ActionType.ADD_ITEM, payload: { item } });
     window.alert("已加入商品");
   }
 
   function changeItemQuantity(itemIndex, itemQuantity) {
     dispatch({
-      type: Action.CHANGE_ITEM_QUANTITY,
+      type: ActionType.CHANGE_ITEM_QUANTITY,
       payload: { itemIndex, itemQuantity },
     });
     window.alert("已修改數量");
@@ -126,7 +126,7 @@ function App() {
 
   function deleteItem(itemIndex) {
     dispatch({
-      type: Action.DELETE_ITEM,
+      type: ActionType.DELETE_ITEM,
       payload: { itemIndex: itemIndex },
     });
     window.alert("已刪除商品");
@@ -134,7 +134,7 @@ function App() {
 
   function clearItems() {
     dispatch({
-      type: Action.CLEAR_ITEM,
+      type: ActionType.CLEAR_ITEM,
     });
   }
 
