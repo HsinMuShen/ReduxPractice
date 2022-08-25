@@ -1,12 +1,14 @@
-import { useContext, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux/es/exports";
+import { clearItems } from "../../actions";
+import { useSelector } from "react-redux/es/exports";
+import styled from "styled-components";
 
-import CartContext from '../../contexts/CartContext';
-import api from '../../utils/api';
-import getJwtToken from '../../utils/getJwtToken';
-import tappay from '../../utils/tappay';
-import Cart from './Cart';
+import api from "../../utils/api";
+import getJwtToken from "../../utils/getJwtToken";
+import tappay from "../../utils/tappay";
+import Cart from "./Cart";
 
 const Wrapper = styled.div`
   margin: 0 auto;
@@ -277,43 +279,44 @@ const CheckoutButton = styled.button`
 
 const recipientFormGroups = [
   {
-    label: '收件人姓名',
-    key: 'name',
-    text: '務必填寫完整收件人姓名，避免包裹無法順利簽收',
+    label: "收件人姓名",
+    key: "name",
+    text: "務必填寫完整收件人姓名，避免包裹無法順利簽收",
   },
-  { label: 'Email', key: 'email' },
-  { label: '手機', key: 'phone' },
-  { label: '地址', key: 'address' },
+  { label: "Email", key: "email" },
+  { label: "手機", key: "phone" },
+  { label: "地址", key: "address" },
   {
-    label: '配送時間',
-    key: 'time',
+    label: "配送時間",
+    key: "time",
     options: [
       {
-        label: '08:00-12:00',
-        value: 'morning',
+        label: "08:00-12:00",
+        value: "morning",
       },
       {
-        label: '14:00-18:00',
-        value: 'afternoon',
+        label: "14:00-18:00",
+        value: "afternoon",
       },
       {
-        label: '不指定',
-        value: 'anytime',
+        label: "不指定",
+        value: "anytime",
       },
     ],
   },
 ];
 
 function Checkout() {
+  const cartItems = useSelector((cartItems) => cartItems);
   const [recipient, setRecipient] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    time: '',
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    time: "",
   });
-  const cart = useContext(CartContext);
-  const items = cart.getItems();
+  const dispatch = useDispatch();
+  const items = cartItems;
   const navigate = useNavigate();
   const cardNumberRef = useRef();
   const cardExpirationDateRef = useRef();
@@ -328,6 +331,7 @@ function Checkout() {
     );
   }, []);
 
+  console.log(items);
   const subtotal = items.reduce(
     (prev, item) => prev + item.price * item.qty,
     0
@@ -336,7 +340,7 @@ function Checkout() {
   const freight = 30;
 
   async function checkout() {
-    let jwtToken = window.localStorage.getItem('jwtToken');
+    let jwtToken = window.localStorage.getItem("jwtToken");
 
     if (!jwtToken) {
       try {
@@ -346,26 +350,26 @@ function Checkout() {
         return;
       }
     }
-    window.localStorage.setItem('jwtToken', jwtToken);
+    window.localStorage.setItem("jwtToken", jwtToken);
 
     if (items.length === 0) {
-      window.alert('尚未選購商品');
+      window.alert("尚未選購商品");
       return;
     }
 
     if (Object.values(recipient).some((value) => !value)) {
-      window.alert('請填寫完整訂購資料');
+      window.alert("請填寫完整訂購資料");
       return;
     }
 
     if (!tappay.canGetPrime()) {
-      window.alert('付款資料輸入有誤');
+      window.alert("付款資料輸入有誤");
       return;
     }
 
     const result = await tappay.getPrime();
     if (result.status !== 0) {
-      window.alert('付款資料輸入有誤');
+      window.alert("付款資料輸入有誤");
       return;
     }
 
@@ -373,20 +377,20 @@ function Checkout() {
       {
         prime: result.card.prime,
         order: {
-          shipping: 'delivery',
-          payment: 'credit_card',
+          shipping: "delivery",
+          payment: "credit_card",
           subtotal,
           freight,
           total: subtotal + freight,
           recipient,
-          list: cart.getItems(),
+          list: cartItems,
         },
       },
       jwtToken
     );
-    window.alert('付款成功');
-    cart.clearItems();
-    navigate('/thankyou', { state: { orderNumber: data.number } });
+    window.alert("付款成功");
+    dispatch(clearItems());
+    navigate("/thankyou", { state: { orderNumber: data.number } });
   }
 
   return (

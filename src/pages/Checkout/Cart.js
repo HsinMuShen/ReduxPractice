@@ -1,8 +1,9 @@
-import { useContext } from 'react';
-import styled from 'styled-components';
+import { useDispatch } from "react-redux/es/exports";
+import { getItems, changeItemQuantity, deleteItem } from "../../actions";
+import { useSelector } from "react-redux/es/exports";
+import styled from "styled-components";
 
-import CartContext from '../../contexts/CartContext';
-import trash from './trash.png';
+import trash from "./trash.png";
 
 const Header = styled.div`
   display: flex;
@@ -22,7 +23,7 @@ const Quantity = styled.div`
   padding-left: 20px;
 
   @media screen and (max-width: 1279px) {
-    ${(props) => props.hideOnMobile && 'display: none;'}
+    ${(props) => props.hideOnMobile && "display: none;"}
   }
 `;
 
@@ -31,7 +32,7 @@ const UnitPrice = styled.div`
   padding-left: 12px;
 
   @media screen and (max-width: 1279px) {
-    ${(props) => props.hideOnMobile && 'display: none;'}
+    ${(props) => props.hideOnMobile && "display: none;"}
   }
 `;
 
@@ -40,7 +41,7 @@ const Price = styled.div`
   padding-left: 15px;
 
   @media screen and (max-width: 1279px) {
-    ${(props) => props.hideOnMobile && 'display: none;'}
+    ${(props) => props.hideOnMobile && "display: none;"}
   }
 `;
 
@@ -127,7 +128,7 @@ const ItemQuantity = styled.div`
 `;
 
 const ItemQuantityName = styled.div`
-  ${(props) => props.hideOnDesktop && 'display: none;'}
+  ${(props) => props.hideOnDesktop && "display: none;"}
 
   @media screen and (max-width: 1279px) {
     display: block;
@@ -159,7 +160,7 @@ const ItemUnitPrice = styled.div`
 `;
 
 const ItemUnitPriceName = styled.div`
-  ${(props) => props.hideOnDesktop && 'display: none;'}
+  ${(props) => props.hideOnDesktop && "display: none;"}
 
   @media screen and (max-width: 1279px) {
     display: block;
@@ -184,7 +185,7 @@ const ItemPrice = styled.div`
 `;
 
 const ItemPriceName = styled.div`
-  ${(props) => props.hideOnDesktop && 'display: none;'}
+  ${(props) => props.hideOnDesktop && "display: none;"}
 
   @media screen and (max-width: 1279px) {
     display: block;
@@ -211,8 +212,9 @@ const DeleteButton = styled.div`
 `;
 
 function Cart() {
-  const cart = useContext(CartContext);
-  const items = cart.getItems();
+  const cartItems = useSelector((cartItems) => cartItems);
+  const dispatch = useDispatch();
+  const items = cartItems;
 
   return (
     <>
@@ -237,7 +239,9 @@ function Cart() {
               <ItemQuantityName hideOnDesktop>數量</ItemQuantityName>
               <ItemQuantitySelect
                 value={item.qty}
-                onChange={(e) => cart.changeItemQuantity(index, e.target.value)}
+                onChange={(e) =>
+                  dispatch(changeItemQuantity(index, e.target.value))
+                }
               >
                 {Array(item.stock)
                   .fill()
@@ -254,7 +258,7 @@ function Cart() {
               <ItemPriceName hideOnDesktop>小計</ItemPriceName>
               <ItemPriceValue>NT.{item.qty * item.price}</ItemPriceValue>
             </ItemPrice>
-            <DeleteButton onClick={() => cart.deleteItem(index)} />
+            <DeleteButton onClick={() => dispatch(deleteItem(index))} />
           </Item>
         ))}
       </Items>
